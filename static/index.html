@@ -1,85 +1,266 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Sonos API</title>
-    <style media="screen">
-      body { color: #333333; font-family: 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, freesans, sans-serif; margin-top: 25px;}
-      h1 { text-align: center; }
-      a { color: #333333; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      .logo { display: block; margin: auto }
-      .content { margin: 20px 25%; }
-      .docs { background-color: #f4f4f4; border-radius: 4px; padding: 10px; margin-bottom: 20px;}
-      .docs p { padding: 0; margin: 0; line-height: 28px; font-size: 14px; font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace; }
-      .docs .method { background-color: #dbdbdb; padding: 4px; border-radius: 2px; margin-right: 4px;}
-      .docs h2 { margin-bottom: 8px;}
-      .docs h2:first-child { margin-top: 0;}
-      .footer { text-align: center; font-size: 12px; margin: 10px 0 50px 0;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SonosSays</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #333;
+        background-color: #002b36;
+      }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+      #interface {
+        flex: 1;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+      #say {
+        width: 100%;
+        text-align: center;
+        align-self: flex-end;
+        padding: 24px 0;
+        background-color: #2aa198;
+      }
+      #sayer {
+        position: relative;
+        width: 100%;
+        height: 50px;
+        background-color: #278bd2;
+        margin-bottom: 24px;
+      }
+      #saying {
+        display: flex;
+        flex: 1;
+        resize: none;
+        font-family: monospace;
+        background-color: #073642;
+        color: #657b84;
+        font-size: 16px;
+        padding: 12px;
+        border: none;
+        overflow: auto;
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+      }
+      #name-label {
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+      }
+      #name-picker {
+        opacity: 0;
+      }
+      #overlay {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      #overlay.visible {
+        display: flex;
+      }
+      #spinning {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        animation: rotate 0.5s ease-in-out;
+        animation-iteration-count: infinite;
+        -webkit-animation: rotate 1s ease-in-out;
+        -webkit-animation-iteration-count: infinite;
+      }
+      #spinning div {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+      }
+      #spinning div.tl {
+        background-color: #859900;
+        transform: translate(-15px, -15px) rotate(45deg);
+      }
+      #spinning div.tr {
+        background-color: #278bd2;
+        transform: translate(15px, -15px) rotate(45deg);
+      }
+      #spinning div.bl {
+        background-color: #dc322e;
+        transform: translate(-15px, 15px) rotate(45deg);
+      }
+      #spinning div.br {
+        background-color: #2aa198;
+        transform: translate(15px, 15px) rotate(45deg);
+      }
+      .absolute-fill {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @-webkit-keyframes rotate {
+        from {
+          -webkit-transform: rotate(0deg);
+        }
+        to {
+          -webkit-transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
-    <img class="logo" src="/sonos-icon.png" alt="Sonos" width="256px" />
-    <div class="content">
-      <h1>Sonos API</h1>
 
-      <div class="docs">
-        <h2>Info</h2>
-        <p><span class="method">GET</span> <a href="/zones">/zones</a></p>
-        <p><span class="method">GET</span> <a href="/favorites">/favorites</a></p>
-        <p><span class="method">GET</span> <a href="/playlists">/playlists</a></p>
+    <div id="interface">
+
+      <div id="sayer">
+        <div id="name-label" class="absolute-fill">russell</div>
+        <select id="name-picker" class="absolute-fill">
+          <option value="Geraint">Geraint</option>
+          <option value="Gwyneth">Gwyneth</option>
+          <option value="Mads">Mads</option>
+          <option value="Naja">Naja</option>
+          <option value="Hans">Hans</option>
+          <option value="Marlene">Marlene</option>
+          <option value="Nicole">Nicole</option>
+          <option value="Russell" selected>Russell</option>
+          <option value="Amy">Amy</option>
+          <option value="Brian">Brian</option>
+          <option value="Emma">Emma</option>
+          <option value="Raveena">Raveena</option>
+          <option value="Ivy">Ivy</option>
+          <option value="Joanna">Joanna</option>
+          <option value="Joey">Joey</option>
+          <option value="Justin">Justin</option>
+          <option value="Kendra">Kendra</option>
+          <option value="Kimberly">Kimberly</option>
+          <option value="Salli">Salli</option>
+          <option value="Conchita">Conchita</option>
+          <option value="Enrique">Enrique</option>
+          <option value="Miguel">Miguel</option>
+          <option value="Penelope">Penelope</option>
+          <option value="Chantal">Chantal</option>
+          <option value="Celine">Celine</option>
+          <option value="Mathieu">Mathieu</option>
+          <option value="Dora">Dora</option>
+          <option value="Karl">Karl</option>
+          <option value="Carla">Carla</option>
+          <option value="Giorgio">Giorgio</option>
+          <option value="Mizuki">Mizuki</option>
+          <option value="Liv">Liv</option>
+          <option value="Lotte">Lotte</option>
+          <option value="Ruben">Ruben</option>
+          <option value="Ewa">Ewa</option>
+          <option value="Jacek">Jacek</option>
+          <option value="Jan">Jan</option>
+          <option value="Maja">Maja</option>
+          <option value="Ricardo">Ricardo</option>
+          <option value="Vitoria">Vitoria</option>
+          <option value="Cristiano">Cristiano</option>
+          <option value="Ines">Ines</option>
+          <option value="Carmen">Carmen</option>
+          <option value="Maxim">Maxim</option>
+          <option value="Tatyana">Tatyana</option>
+          <option value="Astrid">Astrid</option>
+          <option value="Filiz">Filiz</option>
+          <option value="Vicki">Vicki</option>
+        </select>
       </div>
 
-      <div class="docs">
-        <h2>Global Control</h2>
-        <p><span class="method">GET</span> /lockvolumes</p>
-        <p><span class="method">GET</span> /unlockvolumes</p>
-        <p><span class="method">GET</span> /pauseall</p>
-        <p><span class="method">GET</span> /resumeall</p>
-        <p><span class="method">GET</span> /reindex</p>
-        <p><span class="method">GET</span> /sleep/{timeout in seconds or timestamp HH:MM:SS or off}</p>
-        <p><span class="method">GET</span> /preset/{JSON preset}</p>
-        <p><span class="method">GET</span> /preset/{predefined preset name}</p>
-      </div>
+      <textarea id="saying"></textarea>
 
-      <div class="docs">
-        <h2>Zone Control</h2>
-        <p><span class="method">GET</span> /{zone name}/{action}[/{parameter}]</p>
+    </div>
 
-        <h3>Actions</h3>
-        <ul>
-          <li><strong>play</strong></li>
-          <li><strong>pause</strong></li>
-          <li><strong>playpause</strong> (toggles playing state)</li>
-          <li><strong>volume</strong> (parameter is absolute or relative volume. Prefix +/- indicates relative volume)</li>
-          <li><strong>groupVolume</strong> (parameter is absolute or relative volume. Prefix +/- indicates relative volume)</li>
-          <li><strong>mute</strong> / <strong>unmute</strong></li>
-          <li><strong>groupMute</strong> / <strong>groupUnmute</strong></li>
-          <li><strong>togglemute</strong> (toggles mute state)</li>
-          <li><strong>seek</strong> (parameter is queue index)</li>
-          <li><strong>trackseek</strong> (parameter is in seconds, 60 for 1:00, 120 for 2:00 etc)</li>
-          <li><strong>next</strong></li>
-          <li><strong>previous</strong></li>
-          <li><strong>state</strong> (will return a json-representation of the current state of player)</li>
-          <li><strong>favorite</strong></li>
-          <li><strong>playlist</strong></li>
-          <li><strong>lockvolumes</strong> / <strong>unlockvolumes</strong> (experimental, will enforce the volume that was selected when locking!)</li>
-          <li><strong>repeat</strong> (on/off)</li>
-          <li><strong>shuffle</strong> (on/off)</li>
-          <li><strong>crossfade</strong> (on/off)</li>
-          <li><strong>pauseall</strong> (with optional timeout in minutes)</li>
-          <li><strong>resumeall</strong> (will resume the ones that was pause on the pauseall call. Useful for doorbell, phone calls, etc. Optional timeout)</li>
-          <li><strong>say</strong></li>
-          <li><strong>queue</strong></li>
-          <li><strong>clearqueue</strong></li>
-        </ul>
-      </div>
+    <div id="say" class="disabled">SAY</div>
 
-      <div class="footer">
-        <p><a href="/docs">Full documentation</a></p>
-        <p>Learn more at <a href="https://github.com/jishi/node-sonos-http-api">https://github.com/jishi/node-sonos-http-api</a></p>
+    <div id="overlay" class="absolute-fill">
+      <div id="spinning">
+        <div class="tl"></div>
+        <div class="tr"></div>
+        <div class="bl"></div>
+        <div class="br"></div>
       </div>
     </div>
+
+    <script type="text/javascript">
+      var touchy = ('ontouchstart' in window)
+      var touchend = touchy ? 'touchend' : 'mouseup'
+
+      var sayer = document.getElementById('name-picker')
+      var label = document.getElementById('name-label')
+      sayer.addEventListener('change', function (event) {
+        label.innerText = sayer.value
+      })
+
+      var say = document.getElementById('say')
+      say.addEventListener(touchend, sayerSaySaying, false)
+
+      var saying = document.getElementById('saying')
+      saying.addEventListener('change', onSayingChange)
+      saying.addEventListener('keyup', onSayingChange)
+      function onSayingChange (event) {
+        if (saying.value.trim() === '') {
+          say.className = 'disabled'
+        } else {
+          say.className = ''
+        }
+      }
+
+      var overlay = document.getElementById('overlay')
+      function sayerSaySaying () {
+        if (saying.value.trim() !== '') {
+          overlay.className = 'visible absolute-fill'
+
+          var request = new XMLHttpRequest()
+          request.onreadystatechange = function () {
+            if (request.readyState == XMLHttpRequest.DONE) {
+              overlay.className = ''
+              if (request.status !== 200) {
+                window.alert('That did not work... status was ' + request.status)
+              }
+            }
+          }
+
+          request.open('GET', '/sayall/' + saying.value.trim() + '/' + sayer.value + '/75')
+          request.send()
+        }
+      }
+    </script>
 
   </body>
 </html>
